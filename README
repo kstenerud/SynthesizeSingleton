@@ -1,13 +1,13 @@
 SynthesizeSingleton
 ===================
 
-SynthesizeSingleton is a reusable macro that turns any Objective-C object into a singleton.
+SynthesizeSingleton is a reusable macro that turns any Objective-C class into a singleton.
 Methods "retain", "release", and "retainCount" are wired to have no effect on a class which has
 been turned into a singleton, and all alloc and copy methods will return the existing singleton.
 
 All singleton accessor methods are swizzled so that there's no overhead in calling the shared
 instance beyond a single Objective-C call containing a single line of code which returns a static
-global object (no conditionals).
+global object (no conditionals, no @synchronized).
 
 
 
