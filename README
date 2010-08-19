@@ -1,0 +1,167 @@
+SynthesizeSingleton
+===================
+
+SynthesizeSingleton is a reusable macro that turns any Objective-C object into a singleton.
+Methods "retain", "release", and "retainCount" are wired to have no effect on a class which has
+been turned into a singleton, and all alloc and copy methods will return the existing singleton.
+
+All singleton accessor methods are swizzled so that there's no overhead in calling the shared
+instance beyond a single Objective-C call containing a single line of code which returns a static
+global object (no conditionals).
+
+
+
+License:
+--------
+
+Copyright 2009 Matt Gallagher. All rights reserved.
+
+Permission is given to use this source code file without charge in any
+project, commercial or otherwise, entirely at your risk, with the condition
+that any redistribution (in part or whole) of source code must retain
+this copyright and permission notice. Attribution in compiled projects is
+appreciated but not required.
+
+
+
+Credits:
+--------
+
+SynthesizeSingleton was first made by Matt Gallagher (http://cocoawithlove.com).
+Method swizzling was added by CJ Hansen.
+Custom init support, lesser singletons, and guard ifndef were added by Karl Stenerud.
+
+
+
+Usage:
+------
+
+* To turn your class into a singleton, add one macro call to your header and one to your .m file.
+
+MyClass.h:
+===========================================================
+	#import "SynthesizeSingleton.h"
+
+	@interface MyClass
+	{
+		// Put stuff in here
+	}
+
+	SYNTHESIZE_SINGLETON_FOR_CLASS_HEADER(MyClass);
+
+	// Put methods and properties here
+
+	@end
+===========================================================
+
+
+MyClass.m
+===========================================================
+	#import "MyClass.h"
+
+	@implementation MyClass
+
+	SYNTHESIZE_SINGLETON_FOR_CLASS(MyClass);
+
+	// Put implementation stuff here
+
+	@end
+===========================================================
+
+
+* To access the singleton, do this:
+
+	[MyClass sharedInstance].someProperty;
+	[[MyClass sharedInstance] myMethod:@"this is a string"];
+
+
+* To destroy the singleton, do this:
+
+	[MyClass purgeSharedInstance];
+
+
+
+Advanced Usage:
+---------------
+
+Complex initializers:
+
+SynthesizeSingleton supports non-default initializers.
+
+* To use a non-default initializer, simply use alloc/initXX (BEFORE accessing via sharedInstance)
+  like so:
+
+	[[MyClass alloc] initWithAString:@"this is a string" andNumber:1000];
+
+
+
+Lesser Singletons:
+------------------
+
+A lesser singleton behaves like a singleton, but you can also create non-singleton instances.
+While this breaks the "purity" of the singleton pattern, it can in rare cases be useful.
+
+
+Basic Usage:
+------------
+
+* Modifying for lesser singleton is similar to a regular singleton:
+
+MyClass.h:
+===========================================================
+	#import "SynthesizeSingleton.h"
+
+	@interface MyClass: SomeSuperclass
+	{
+		int value;
+		...
+	}
+	// This is the same as for a regular singleton.
+	SYNTHESIZE_SINGLETON_FOR_CLASS_HEADER(MyClass);
+
+	+ (void) initSharedInstanceWithValue:(int) value;
+
+- (id) initWithValue:(int) value;
+
+	@end
+===========================================================
+
+
+MyClass.m:
+===========================================================
+	#import "MyClass.h"
+
+	@implementation MyClass
+
+	// Note: I'm using "LESSER" here.
+	SYNTHESIZE_LESSER_SINGLETON_FOR_CLASS(MyClass);
+
+	+ (void) initSharedInstanceWithValue:(int) value
+	{
+		// Wrapping the instance init method call so that it
+		// gets instantiated as a singleton.
+		CALL_LESSER_SINGLETON_INIT_METHOD(initWithValue:value);
+	}
+
+	...
+
+	@end
+===========================================================
+
+
+Advanced Usage:
+---------------
+
+* If your instance initializer requires commas, you'll have to wrap the method call yourself:
+
+===========================================================
+	+ (void) initSharedInstanceComplex
+	{
+		CALL_LESSER_SINGLETON_INIT_METHOD_PRE();
+
+		int firstNumber = [self getFirstNumberSomehow];
+		_sharedInstance = [[self alloc] initWithValues:firstNumber, 2, 3, 4, -1];
+
+		CALL_LESSER_SINGLETON_INIT_METHOD_POST();
+	}
+===========================================================
