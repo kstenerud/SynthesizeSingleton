@@ -140,7 +140,7 @@ MyClass.m:
 	{
 		// Wrapping the instance init method call so that it
 		// gets instantiated as a singleton.
-		CALL_LESSER_SINGLETON_INIT_METHOD(initWithValue:value);
+		CALL_LESSER_SINGLETON_INIT_METHOD(MyClass, initWithValue:value);
 	}
 
 	...
@@ -157,11 +157,11 @@ Advanced Usage:
 ===========================================================
 	+ (void) initSharedInstanceComplex
 	{
-		CALL_LESSER_SINGLETON_INIT_METHOD_PRE();
+		CALL_LESSER_SINGLETON_INIT_METHOD_PRE(MyClass);
 
 		int firstNumber = [self getFirstNumberSomehow];
 		_sharedInstance = [[self alloc] initWithValues:firstNumber, 2, 3, 4, -1];
 
-		CALL_LESSER_SINGLETON_INIT_METHOD_POST();
+		CALL_LESSER_SINGLETON_INIT_METHOD_POST(MyClass);
 	}
 ===========================================================
